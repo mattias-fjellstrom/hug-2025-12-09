@@ -1,0 +1,5 @@
+:ec2: All your EC2 instances in region *${region}*:
+
+%{ for instance in instances }
+    • *${instance}* <https://${region}.console.aws.amazon.com/ec2/v2/home?region=${region}#InstanceDetails:instanceId=${instance}|(View in console)>
+%{ endfor }

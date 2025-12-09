@@ -1,0 +1,5 @@
+:route53: All your *Route 53 Hosted Zones*:
+
+%{ for id, name in zones }
+    • <https://${name}|${name}> <https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones?region=us-east-1#ListRecordSets/${id}|(View in console)>
+%{ endfor }
