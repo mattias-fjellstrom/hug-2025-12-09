@@ -36,7 +36,7 @@ resource "azurerm_storage_blob" "index_html" {
   lifecycle {
     action_trigger {
       actions = [action.azurerm_cdn_front_door_cache_purge.index_html]
-      events  = [after_create, after_update]
+      events  = [after_update]
     }
   }
 }

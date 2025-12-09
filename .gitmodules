@@ -1,6 +1,0 @@
-[submodule "terraform-provider-aws"]
-	path = terraform-provider-aws
-	url = https://github.com/hashicorp/terraform-provider-aws.git
-[submodule "terraform-provider-scaffolding-framework"]
-	path = terraform-provider-scaffolding-framework
-	url = https://github.com/hashicorp/terraform-provider-scaffolding-framework.git

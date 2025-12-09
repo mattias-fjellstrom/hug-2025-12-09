@@ -1,3 +1,7 @@
 variable "location" {
-  default = "swedencentral"
+  type = string
+}
+
+variable "azure_subscription_id" {
+  type = string
 }

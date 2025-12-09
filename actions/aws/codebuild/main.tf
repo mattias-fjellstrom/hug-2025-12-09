@@ -1,5 +1,5 @@
-resource "aws_iam_role" "codebuild_role" {
-  name = "codebuild-hello-world-role"
+resource "aws_iam_role" "codebuild" {
+  name = "codebuild"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -15,9 +15,9 @@ resource "aws_iam_role" "codebuild_role" {
   })
 }
 
-resource "aws_iam_role_policy" "codebuild_policy" {
-  name = "codebuild-hello-world-policy"
-  role = aws_iam_role.codebuild_role.id
+resource "aws_iam_role_policy" "codebuild" {
+  name = "codebuild-policy"
+  role = aws_iam_role.codebuild.id
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -30,15 +30,21 @@ resource "aws_iam_role_policy" "codebuild_policy" {
           "logs:PutLogEvents"
         ],
         Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ssm:GetParameters"
+        ],
+        Resource = aws_ssm_parameter.build.arn
       }
     ]
   })
 }
 
-resource "aws_codebuild_project" "hello_world" {
-  name         = "hello-world-build"
-  service_role = aws_iam_role.codebuild_role.arn
-  description  = "A simple CodeBuild project that prints Hello world"
+resource "aws_codebuild_project" "build" {
+  name         = "my-build-project"
+  service_role = aws_iam_role.codebuild.arn
 
   artifacts {
     type = "NO_ARTIFACTS"
@@ -53,14 +59,14 @@ resource "aws_codebuild_project" "hello_world" {
 
   source {
     type      = "NO_SOURCE"
-    buildspec = <<CODEBUILD
-version: 0.2
+    buildspec = <<-CODEBUILD
+      version: 0.2
 
-phases:
-  build:
-    commands:
-      - echo "Hello world"
-CODEBUILD
+      phases:
+        build:
+          commands:
+            - echo "$API_KEY"
+      CODEBUILD
   }
 
   logs_config {
@@ -71,8 +77,33 @@ CODEBUILD
   }
 }
 
+ephemeral "random_password" "build" {
+  length = 100
+}
+
+resource "aws_ssm_parameter" "build" {
+  name             = "/build/parameter"
+  description      = "Parameter used during build"
+  type             = "SecureString"
+  value_wo         = ephemeral.random_password.build.result
+  value_wo_version = 2
+
+  lifecycle {
+    action_trigger {
+      actions = [action.aws_codebuild_start_build.default]
+      events  = [after_create, after_update]
+    }
+  }
+}
+
 action "aws_codebuild_start_build" "default" {
   config {
-    project_name = aws_codebuild_project.hello_world.name
+    project_name = aws_codebuild_project.build.name
+
+    environment_variables_override {
+      name  = "API_KEY"
+      type  = "PARAMETER_STORE"
+      value = aws_ssm_parameter.build.name
+    }
   }
 }
