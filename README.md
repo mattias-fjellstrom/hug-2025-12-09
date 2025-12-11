@@ -1,5 +1,7 @@
 # HashiCorp User Group Göteborg 2025-11-18
 
+![Terraform Actions](./feature.png)
+
 Learn more about actions:
 
 * [Terraform Actions: Deep-Dive](https://mattias.engineer/blog/2025/terraform-actions-deep-dive/)
